@@ -2,7 +2,7 @@
 --
 -- Author:  J. 'KwirkyJ' Smith <kwirkyj.smith0@gmail.com>
 -- Date:    2016
--- Version: 1.0.0
+-- Version: 1.1.0
 -- License: MIT (X11) License
 
 
@@ -39,6 +39,8 @@ assert(tables.len({3, 2, 0.05, "blue", {}, nil, 8}) == 6,
        'nil is ignored')
 assert(tables.len({a=4, b={}, c="cerise"}) == 3,
        'counts non-numeric indices')
+assert(tables.len({a={b={c={d=true, true, "true"}}}, f=false}) == 2,
+       'does not count nested tables')
 
 for _,v in ipairs{nil, 3, 'e', function () return nil end} do
     local result, msg = tables.len(v)
@@ -109,6 +111,8 @@ assert(not tables.alike(t1, t2),
        'assuredly different')
 setmetatable(t1, mt)
 setmetatable(t2, mt)
+assert(not tables.alike(t1, t2),
+       'does not use metatables by default')
 assert(tables.alike(t1, t2, nil, true),
        'use the metatable which says they are equal')
 
@@ -184,7 +188,7 @@ assert(msg == "Tables unequal at: [1][2]['t']", msg)
 
 ---- tables.getOrderedKeys ---------------------------------------------------
 
-local getseq = tables.getOrderedKeys
+local getOrd = tables.getOrderedKeys
 local e = {{}, 
            {1, 6}, 
            {'Red', '_blue', 'apples'}, 
@@ -196,24 +200,26 @@ local a = {{},
            {{}, [-4] = '', kumquat = 'pickelbarrel'}
           }
 for i=1, 4 do
-    assert(tables.alike(getseq(a[i]), e[i]),
+    assert(tables.alike(getOrd(a[i]), e[i]),
            'unexpected mismatch at ' .. tostring(i))
 end
 
 
 e = {'oranges', 'bananas'}
-a = getseq({bananas     = true, 
+a = getOrd({bananas     = true, 
             blueberries = true,
             oranges     = true,
             tangerienes = true,
            },
-           function(a,b) return a > b end,
-           function(s) return not s:find('i') end)
-assert(tables.alike(actual, expected),
+           function(a,b) return a > b end, -- comparison
+           function(s) return not s:find('i') end) -- filter
+assert(tables.alike(a, e),
        'filter and comp at work')
 
-
---TODO: test/demonstrate type-checking of parameters
+assert(not pcall(getOrd, 5),
+       'non-tables raises an error')
+assert(not pcall(getOrd, nil),
+       'nil values are not tables')
 
 
 

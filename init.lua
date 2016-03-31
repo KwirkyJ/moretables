@@ -1,9 +1,9 @@
 -- Utility library to support useful operations on tables not present in the 
 -- standard library.
 -- 
--- Author:  Jake Smith (KwirkyJ) <fallback1681@gmail.com>
+-- Author:  J. 'KwirkyJ' Smith <kwirkyj.smith0@gmail.com>
 -- Date:    2016
--- Version: 1.1
+-- Version: 1.1.0
 -- License: MIT (X11) License
 --
 -- Special thanks to the authors of LuaUnit, the modification of which made
