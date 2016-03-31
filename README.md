@@ -1,6 +1,7 @@
 # moretables
 
 Lua library providing some 'missing' functions for tables.
+Requires the lua_stringbuffer library.
 
 ## API Reference
 

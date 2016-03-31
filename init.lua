@@ -5,20 +5,16 @@
 -- Date:    2016
 -- Version: 1.1.0
 -- License: MIT (X11) License
---
--- Special thanks to the authors of LuaUnit, the modification of which made
--- some of the work here a repeat exercise. 
--- (I wrote code there and then re-wrote it here for modularity.)
 
 
 
-local Buffer = require 'lua_stringbuffer' --'stringbuffer'
+local Buffer = require 'lua_stringbuffer'
 
 
 
 local DEFAULT_DELTA = 1e-12
 
-local t = {_VERSION = "1.1",
+local t = {_VERSION = "1.1.0",
            _delta   = DEFAULT_DELTA,
           }
 
