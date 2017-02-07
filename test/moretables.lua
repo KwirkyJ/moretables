@@ -191,6 +191,76 @@ assert(msg == "Tables unequal at: [1][2]['t']", msg)
 
 
 
+---- tables.clone ------------------------------------------------------------
+
+local f = function () return 4 end
+
+e, a = {}, tables.clone ({})
+assert (tables.alike (e, a), "empty clones are alike")
+assert (not (a == e), "clones are distinct")
+
+t1 = {5,'blue', false, f}
+e, a = t1, tables.clone (t1)
+assert (tables.alike (e, a), "array clones are alike")
+assert (not (a == e), "clones are distinct from original")
+
+t1 = {blue=7, f=true, [1]='orange'}
+e, a = t1, tables.clone (t1)
+assert (tables.alike (e, a), "table clones are alike")
+
+t1 = {
+      {
+       {false}, 
+       {['none'] = {5, 
+        {[5]='intrepid'},
+       },
+      },
+     }, 
+     spam = {5}, 
+     [123] = false,
+    }
+e, a = t1, tables.clone (t1)
+assert (tables.alike (e, a), "nested clones are alike")
+ 
+for _,v in ipairs {5, true, function () return false end, "string"} do
+    ok, msg = pcall (tables.clone, v)
+    assert (not ok, "type error")
+    assert (msg, 
+            "mildly-informative error messages are better than uninformative")
+end
+
+t1 = {oranges = 7, limes =  7}
+t2 = {oranges = 7, limes = 17}
+assert (not tables.alike (t1, t2))
+assert (not tables.alike (t1, tables.clone (t2)))
+assert (not tables.alike (tables.clone (t1), tables.clone (t2)))
+assert (not tables.alike (t2, tables.clone (t1)),
+        "mismatched tables will have clone(s) mismatch")
+
+t1 = {oranges = 6, limes = {sale=true, cost=0.75}}
+t2 = {oranges = 7, limes = {sale=false, cost=0.75}}
+assert (not tables.alike (t1, t2))
+assert (not tables.alike (t1, tables.clone (t2)))
+assert (not tables.alike (tables.clone (t1), tables.clone (t2)))
+assert (not tables.alike (t2, tables.clone (t1)),
+        "mismatched nested tables will have clone(s) mismatch")
+
+t1 = {oranges = 6}
+t2 = {oranges = 7, limes = 6}
+assert (not tables.alike (t1, t2))
+assert (not tables.alike (t1, tables.clone (t2)))
+assert (not tables.alike (tables.clone (t1), tables.clone (t2)))
+assert (not tables.alike (t2, tables.clone (t1)),
+        "tables with different/missing keys will have clone(s) mismatch")
+
+t1 = {"spam", "eggs"}
+t2 = tables.clone (t1)
+assert (tables.alike (t2, t1))
+t1[1] = "green eggs"
+assert (not tables.alike (t1, t2), "changing original does not change clone")
+
+
+
 ---- tables.getOrderedKeys ---------------------------------------------------
 
 local getOrd = tables.getOrderedKeys

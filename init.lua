@@ -130,6 +130,30 @@ end
 t.alike = alike
 
 
+---Create a deep copy of a table
+---does not transfer metatable
+---@param t table instance to copy
+---@error iff t is not a table
+---@return Deep copy of a table (copy by value)
+local clone
+clone = function (t)
+    local ttype = type(t)
+    if ttype ~= "table" then
+        error ("attempting to clone non-table! was "..ttype)
+    end
+    local c = {}
+    for k,v in pairs (t) do
+        if type(v) == "table" then
+            c[k] = clone (v)
+        else
+            c[k] = v
+        end
+    end
+    return c
+end
+t.clone = clone
+
+
 
 ---Inner function for sorting a list by keys;
 -- assumption: only numbers and strings can be keys (values in orderedI);

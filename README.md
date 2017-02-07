@@ -24,6 +24,9 @@ return count
 #### ```moretables.alike(a, b[, delta][, use_metatable])```
 Returns true if ```a``` and ```b``` are alike. If neither is a table, tries to compare with ```==```; if both are numbers, will return true if ```|(|a| - |b|)| <= delta``` (if ```delta``` is not provided, uses the module's set default); if both are tables, will return true if all elements and nested elements satisfy the above equalities; a type mismatch will result in immediate failure. ```use_metatable``` is a boolean flag to use the tables' ```__eq``` metamethod if it exists (defaults to false).
 
+#### ```moretables.clone(t)```
+Create a deep copy of table ```t```. Modifications to ```t```, its clone, or any nested tables are not effected on the other. Does not copy metatable. Raises an error if ```t``` is not a table. 
+
 #### ```moretables.getOrderedKeys(t[,comp][, filter])```
 Returns a list of keys to the table. By default, returns all element keys/indices sorted alphanumerically (0..20, a, zoo). ```comp``` can be a function that takes two elements(keys) and returns true if the first element is to come before the second (default is equivalent to ```function(a,b) return a < b end```). ```filter``` is a function that takes one argument (key) and returns true if that key is to be included. Raises an error if ```t``` is not a table.
 
