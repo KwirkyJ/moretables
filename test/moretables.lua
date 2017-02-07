@@ -9,7 +9,12 @@
 
 local tables = require 'moretables'
 
+
+
 local a, e -- actual, expected
+local ok, msg -- output stuff
+local mt -- metatable
+local t1, t2 -- comparison tables
 
 
 
@@ -43,9 +48,9 @@ assert(tables.len({a={b={c={d=true, true, "true"}}}, f=false}) == 2,
        'does not count nested tables')
 
 for _,v in ipairs{nil, 3, 'e', function () return nil end} do
-    local result, msg = tables.len(v)
+    local result, out = tables.len(v)
     assert(result == nil)
-    assert(msg == "Table expected, received " .. type(v),
+    assert(out == "Table expected, received " .. type(v),
            'error condition when not a table')
 end
 
@@ -55,7 +60,7 @@ end
 
 -- non-tables works like '=='
 
-local ok, msg = tables.alike(-3, {})
+ok, msg = tables.alike(-3, {})
 assert(ok == false,
        'failure is a boolean-false value')
 assert(msg == "Differing types: number ~= table",
@@ -105,8 +110,8 @@ assert(tables.alike({{1.04}}, {{1}}, 0.05),
        'nested values "close enough"')
 
 
-local mt = {__eq = function() return true end} 
-local t1, t2 = {5}, {{{}}} -- definitely not equal
+mt = {__eq = function() return true end} 
+t1, t2 = {5}, {{{}}} -- definitely not equal
 assert(not tables.alike(t1, t2),
        'assuredly different')
 setmetatable(t1, mt)
@@ -117,7 +122,7 @@ assert(tables.alike(t1, t2, nil, true),
        'use the metatable which says they are equal')
 
 
-local ok, msg = tables.alike(-3, {})
+ok, msg = tables.alike(-3, {})
 assert(ok == false,
        'failure is a boolean-false value')
 assert(msg == "Differing types: number ~= table")
@@ -167,17 +172,17 @@ assert(not ok)
 assert(msg == "First differing element at [2]['1']['a']: 'blue' ~= 'green'")
 
 ok, msg = tables.alike({a=0, b=1, c=1}, 
-                           {a=0, b=1, c=0.9999999}, 
-                           1e-12)
+                       {a=0, b=1, c=0.9999999}, 
+                       1e-12)
 assert(not ok)
 assert(msg == "First differing element at ['c']: (1 - 0.9999999) > 1e-12")
 
 t1, t2 = {a=5}, {[3] = true}
-local mt = {__eq = function(self) return self[1] ~= nil end}
+mt = {__eq = function(self) return self[1] ~= nil end}
 setmetatable(t1, mt)
 setmetatable(t2, mt)
-_,msg = tables.alike(t1, t2, nil, true)
-assert(msg == 'Tables unequal')
+ok, msg = tables.alike(t1, t2, nil, true)
+assert(not ok and msg == 'Tables unequal')
 
 --metatable will cause nested t=t1 to fail
 ok, msg = tables.alike({{4,{t=t1}, 3}}, {{4, {t=t2}, 3}}, nil, true)
@@ -189,16 +194,16 @@ assert(msg == "Tables unequal at: [1][2]['t']", msg)
 ---- tables.getOrderedKeys ---------------------------------------------------
 
 local getOrd = tables.getOrderedKeys
-local e = {{}, 
-           {1, 6}, 
-           {'Red', '_blue', 'apples'}, 
-           {-4, 1, 'kumquat'}
-          }
-local a = {{}, 
-           {[6]='orange', [1]=function() end},
-           {['_blue'] = true, Red = false, ['apples'] = {}},
-           {{}, [-4] = '', kumquat = 'pickelbarrel'}
-          }
+e = {{}, 
+     {1, 6}, 
+     {'Red', '_blue', 'apples'}, 
+     {-4, 1, 'kumquat'}
+    }
+a = {{}, 
+     {[6]='orange', [1]=function() end},
+     {['_blue'] = true, Red = false, ['apples'] = {}},
+     {{}, [-4] = '', kumquat = 'pickelbarrel'}
+    }
 for i=1, 4 do
     assert(tables.alike(getOrd(a[i]), e[i]),
            'unexpected mismatch at ' .. tostring(i))
@@ -211,8 +216,8 @@ a = getOrd({bananas     = true,
             oranges     = true,
             tangerienes = true,
            },
-           function(a,b) return a > b end, -- comparison
-           function(s) return not s:find('i') end) -- filter
+           function (x,y) return x > y end, -- comparison
+           function (s) return not s:find('i') end) -- filter
 assert(tables.alike(a, e),
        'filter and comp at work')
 
