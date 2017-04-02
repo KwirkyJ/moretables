@@ -3,8 +3,9 @@
 -- 
 -- Author:  J. 'KwirkyJ' Smith <kwirkyj.smith0@gmail.com>
 -- Date:    2016
--- Version: 1.1.0
+-- Version: 1.2.0
 -- License: MIT (X11) License
+-- Homepage: https://github.com/KwirkyJ/moretables
 
 
 
@@ -14,7 +15,7 @@ local Buffer = require 'lua_stringbuffer'
 
 local DEFAULT_DELTA = 1e-12
 
-local T = {_VERSION = "1.1.0",
+local T = {_VERSION = "1.2.0",
            _delta   = DEFAULT_DELTA,
           }
 
@@ -77,8 +78,11 @@ alike = function(t1, t2, maxdelta, use_mt, loc)
     local preface = ''
     if type(t1) ~= type(t2) then 
         preface = 'Differing types'
-        if loc then preface = 'Differing types at ' .. loc end
-        return false,string.format('%s: %s ~= %s', preface, type(t1), type(t2))
+        if loc then 
+            preface = string.format ('Differing types at %s', tostring (loc)) 
+        end
+        return false, string.format('%s: %s ~= %s', 
+                                    preface, type(t1), type(t2))
     elseif type(t1) == 'number' then
         if (math.max(t1,t2) - math.min(t1,t2) > maxdelta) then
             if loc then
@@ -97,6 +101,7 @@ alike = function(t1, t2, maxdelta, use_mt, loc)
             if loc then preface = 'Tables unequal at: ' .. loc end
             return false, preface
         end
+        
         local len1, len2 = len(t1), len(t2)
         if len1 ~= len2 then
             preface = 'Tables of differing length'
@@ -111,8 +116,10 @@ alike = function(t1, t2, maxdelta, use_mt, loc)
         for k, v1 in pairs(t1) do
             if type(k) == 'string' then 
                 key = string.format("%s['%s']", loc, k)
-            else
+            elseif type(k) == 'number' then
                 key = string.format("%s[%d]", loc, k)
+            else 
+                key = string.format ("%s[%s]", loc, tostring (k))
             end
             local ok, err = alike(v1, t2[k], maxdelta, use_mt, key)
             if not ok then return ok, err end

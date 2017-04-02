@@ -143,6 +143,16 @@ assert(msg == "(8 - 3) > 1e-12",
        'beyond delta')
 
 
+-- test tables as indices
+
+t1 = {5}
+ok, msg = tables.alike({[t1] = 'blue'}, {})
+assert(not ok)
+assert(msg == "Tables of differing length: 1 ~= 0")
+
+assert (tables.alike ({[t1] = 'hay'}, {[t1] = 'hay'}))
+assert (tables.alike ({hay = {[t1] = true}}, {hay = {[t1] = true}}))
+
 
 -- test error messages
 
@@ -188,6 +198,35 @@ assert(not ok and msg == 'Tables unequal')
 ok, msg = tables.alike({{4,{t=t1}, 3}}, {{4, {t=t2}, 3}}, nil, true)
 assert (not ok)
 assert(msg == "Tables unequal at: [1][2]['t']", msg)
+
+
+
+t1 = {a=5}
+ok, msg = tables.alike ({[t1] = true}, {[t1] = false})
+assert (not ok)
+assert(msg == string.format (
+              "First differing element at [%s]: true ~= false", 
+              tostring (t1)),
+       msg)
+
+ok, msg = tables.alike ({hay = {[t1] = true}}, {hay = {[t1] = 5}})
+assert (not ok)
+assert(msg == string.format (
+              "Differing types at ['hay'][%s]: boolean ~= number", 
+              tostring (t1)),
+       msg)
+
+-- mismatched elements are difficult to handle even with sensible keys
+-- t1 and t2 are alike, but are different tables and accordingly have
+--     different hashes
+t2 = {a=5}
+assert (tables.alike (t1, t2))
+ok, msg = tables.alike ({[t1] = true}, {[t2] = true})
+assert (not ok)
+assert(msg == string.format (
+              "Differing types at [%s]: boolean ~= nil", 
+              tostring (t1)),
+       msg)
 
 
 
@@ -258,6 +297,14 @@ t2 = tables.clone (t1)
 assert (tables.alike (t2, t1))
 t1[1] = "green eggs"
 assert (not tables.alike (t1, t2), "changing original does not change clone")
+
+local in_t = {'blue', 'orange'}
+t1 = {[in_t] = 5}
+t2 = tables.clone (t1)
+assert (tables.alike (t2, t1))
+in_t[3] = 'yellow'
+assert (tables.alike (t1,t2))
+assert (tables.alike (in_t, {'blue', 'orange', 'yellow'}))
 
 
 
@@ -331,6 +378,15 @@ assert(str(t1) == [=[{
     }
   }
 }]=], str(t1))
+
+
+t1 = {5}
+t2 = {martians = {[t1] = 'blue'}}
+assert (tables.tostring (t2) == string.format ([=[{
+  ['martians'] = {
+    [%s] = 'blue'
+  }
+}]=], tostring(t1)))
 
 
 
