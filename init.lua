@@ -14,7 +14,7 @@ local Buffer = require 'lua_stringbuffer'
 
 local DEFAULT_DELTA = 1e-12
 
-local t = {_VERSION = "1.1.0",
+local T = {_VERSION = "1.1.0",
            _delta   = DEFAULT_DELTA,
           }
 
@@ -26,7 +26,7 @@ local t = {_VERSION = "1.1.0",
 local getTolerance = function(self)
     return self._delta
 end
-t.getTolerance = getTolerance
+T.getTolerance = getTolerance
 
 ---moretables:setTolerance(delta)
 -- Set the delta/tolerance used in tables.alike when none is supplied.
@@ -37,7 +37,7 @@ local setTolerance = function(self, delta)
     assert(type(delta) == 'number', 'delta argument must be a number')
     self._delta = delta
 end
-t.setTolerance = setTolerance
+T.setTolerance = setTolerance
 
 
 
@@ -46,7 +46,7 @@ t.setTolerance = setTolerance
 -- @param t The table.
 -- @return nil and failure message iff not a table;
 --         else the count of elements in the table.
-len = function(t)
+local len = function(t)
  if type(t) ~= 'table' then 
         return nil, "Table expected, received "..type(t)
     end
@@ -56,7 +56,7 @@ len = function(t)
     end
     return count
 end
-t.len = len
+T.len = len
 
 ---moretables.alike(t1, t2[, maxdelta] [, use_mt] [, loc])
 -- Check whether two tables are equivalent;
@@ -69,10 +69,11 @@ t.len = len
 -- @param loc      Internal string to place mismatched elements.
 -- @return True iff tables share same keys and respective values differ by 
 --         less than maxdelta; else false and failure message.tab1
+local alike
 alike = function(t1, t2, maxdelta, use_mt, loc)
     -- the code would be much more elegant if it was not as concerned with
     -- providing error messages.
-    maxdelta = maxdelta or t._delta
+    maxdelta = maxdelta or T._delta
     local preface = ''
     if type(t1) ~= type(t2) then 
         preface = 'Differing types'
@@ -127,7 +128,7 @@ alike = function(t1, t2, maxdelta, use_mt, loc)
     end
     return true
 end
-t.alike = alike
+T.alike = alike
 
 
 ---Create a deep copy of a table
@@ -151,7 +152,7 @@ clone = function (t)
     end
     return c
 end
-t.clone = clone
+T.clone = clone
 
 
 
@@ -202,7 +203,7 @@ local getOrderedKeys = function(t, comp, filter)
     table.sort(list, comp)
     return list
 end
-t.getOrderedKeys = getOrderedKeys
+T.getOrderedKeys = getOrderedKeys
 
 
 
@@ -212,6 +213,7 @@ t.getOrderedKeys = getOrderedKeys
 -- @param indent Number for the number of spaces to indent (default 0).
 -- @return Iff type(t) ~= 'table' then tostring(t);
 --         else, pretty-prints the table and any nested contents.
+local toStr
 toStr = function(t, indent)
     if type(t) ~= 'table' then return tostring(t) end
     
@@ -222,7 +224,8 @@ toStr = function(t, indent)
     if #indices == 0 then return '{}' end -- empty table
     
     indent = indent or 0
-    local ins, value = string.rep(' ', indent+2), nil
+    local ins, value
+    ins = string.rep(' ', indent+2)
     sb:add('{')
     for i=1, #indices do
         key = indices[i]
@@ -243,9 +246,9 @@ toStr = function(t, indent)
     sb:add(string.rep(' ', indent) .. '}')
     return sb:getString()
 end
-t.tostring = toStr
+T.tostring = toStr
 
 
 
-return t
+return T
 
