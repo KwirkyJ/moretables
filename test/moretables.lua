@@ -42,7 +42,7 @@ assert(tables.len({}) == 0,
        'empty table')
 assert(tables.len({3, 2, 0.05, "blue", {}, nil, 8}) == 6, 
        'nil is ignored')
-assert(tables.len({a=4, b={}, c="cerise"}) == 3,
+assert(tables.len({a=4, b={}, c="cerise", [{}] = true}) == 4,
        'counts non-numeric indices')
 assert(tables.len({a={b={c={d=true, true, "true"}}}, f=false}) == 2,
        'does not count nested tables')
