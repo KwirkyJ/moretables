@@ -2,7 +2,7 @@
 --
 -- Author:  J. 'KwirkyJ' Smith <kwirkyj.smith0@gmail.com>
 -- Date:    2016
--- Version: 1.1.0
+-- Version: 1.3.0
 -- License: MIT (X11) License
 
 
@@ -247,6 +247,7 @@ t1 = {blue=7, f=true, [1]='orange'}
 e, a = t1, tables.clone (t1)
 assert (tables.alike (e, a), "table clones are alike")
 
+t2 = {true}
 t1 = {
       {
        {false}, 
@@ -257,6 +258,7 @@ t1 = {
      }, 
      spam = {5}, 
      [123] = false,
+     [t2] = true,
     }
 e, a = t1, tables.clone (t1)
 assert (tables.alike (e, a), "nested clones are alike")
@@ -308,23 +310,84 @@ assert (tables.alike (in_t, {'blue', 'orange', 'yellow'}))
 
 
 
+---- tables.defaultCmpFunc ---------------------------------------------------
+
+local cmp = tables.defaultCmpFunc
+
+assert (cmp (3,5))
+assert (not cmp (5,3))
+assert (cmp (-3, 5))
+assert (cmp ('d', 'f'))
+assert (cmp ('H', 'h'), "capitals first")
+assert (not cmp('k', 'K'))
+assert (cmp (5, 'l'), "numbers before strings")
+assert (not cmp ('o', -3))
+assert (cmp (true, true))
+assert (cmp (true, false))
+assert (not cmp (false, true))
+assert (cmp (false, false))
+t1, t2 = io.tmpfile (), io.tmpfile ()
+assert (cmp (t1, t2) == (tostring (t1) < tostring (t2)))
+t1 = {}
+assert (not cmp (t2, t1))
+assert (cmp (t1, t2))
+t2 = {}
+assert (cmp (t1, t2) == (tostring (t1) < tostring (t2)))
+assert (cmp (true, t2))
+assert (cmp (5, true))
+assert (cmp ('h', false))
+assert (not cmp (true, 'K'))
+
+
+
 ---- tables.getOrderedKeys ---------------------------------------------------
 
 local getOrd = tables.getOrderedKeys
-e = {{}, 
-     {1, 6}, 
-     {'Red', '_blue', 'apples'}, 
-     {-4, 1, 'kumquat'}
-    }
-a = {{}, 
-     {[6]='orange', [1]=function() end},
-     {['_blue'] = true, Red = false, ['apples'] = {}},
-     {{}, [-4] = '', kumquat = 'pickelbarrel'}
-    }
-for i=1, 4 do
-    assert(tables.alike(getOrd(a[i]), e[i]),
-           'unexpected mismatch at ' .. tostring(i))
+
+e = {}
+t1 = {}
+assert (tables.alike (getOrd(t1), e))
+
+e = {1, 6}
+t1 = {[6]='orange', [1]=function() end}
+assert (tables.alike (getOrd(t1), e))
+
+e = {1,2,3,4}
+t1 = {true, 'oranges', 5, {}}
+assert (tables.alike (getOrd(t1), e))
+
+t2 = {'coffee'}
+e = {-4, 1, 'Kumquat', 'kumquat', t2}
+t1 = {'s', [t2] = true, Kumquat = 'blue', ['kumquat'] = 'glue', [-4] = {5, 5}}
+assert (tables.alike (getOrd(t1), e), 
+        string.format ("expected:\n%s\nactual:\n%s", tables.tostring (e), 
+                                 tables.tostring (getOrd (t1))))
+
+t1 = {}
+t2 = io.tmpfile ()
+e = {5, 'blue', true, false, t1, t2}
+assert (tables.alike (getOrd {[t2] = 0, blue = 0, [5] = 0, 
+                              [t1] = 0, [true] = 0, [false] = 0},
+                      e),
+        "ordering: number, string, bool, table, userdata (filehandle)")
+
+t1 = io.tmpfile ()
+-- t2 still tmpfile
+e = {t1, t2}
+if tostring (t1) > tostring (t2) then 
+    e = {t2, t1}
 end
+assert (tables.alike (getOrd {[t1] = 5, [t2] = 4}, e),
+        "userdata sorted by tostring of thing")
+
+t1, t2 = {}, {}
+e = {t1, t2}
+if tostring (t1) > tostring (t2) then 
+    e = {t2, t1}
+end
+assert (tables.alike (getOrd {[t1] = 'a', [t2] = 'b'}, e),
+        "tables sorted by tostring of table")
+
 
 
 e = {'oranges', 'bananas'}

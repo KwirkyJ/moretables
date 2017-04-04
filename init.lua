@@ -3,7 +3,7 @@
 -- 
 -- Author:  J. 'KwirkyJ' Smith <kwirkyj.smith0@gmail.com>
 -- Date:    2016
--- Version: 1.2.0
+-- Version: 1.3.0
 -- License: MIT (X11) License
 -- Homepage: https://github.com/KwirkyJ/moretables
 
@@ -15,7 +15,13 @@ local Buffer = require 'lua_stringbuffer'
 
 local DEFAULT_DELTA = 1e-12
 
-local T = {_VERSION = "1.2.0",
+local PRIORITY = {['number']   = 1, 
+                  ['string']   = 2, 
+                  ['boolean']  = 3, 
+                  ['table']    = 4, 
+                  ['userdata'] = 5}
+
+local T = {_VERSION = "1.3.0",
            _delta   = DEFAULT_DELTA,
           }
 
@@ -164,18 +170,29 @@ T.clone = clone
 
 
 ---Inner function for sorting a list by keys;
--- assumption: only numbers and strings can be keys (values in orderedI);
--- if same type, uses '<'
--- else, numbers come first.
+---type priority defined in local PRIORITIES
+---numbers, numbers : `<`
+---booleans : true < false
+---other : tostring (a) < tostring (b)
 local function _comp(a,b)
-    if type(a) == type(b) then
-        return a < b
-    elseif type(a) == 'number' then
-        return true
+    local atype, btype = type(a), type(b)
+    if atype == btype then
+        if atype == 'string' or atype == 'number' then
+            return a < b
+        elseif atype == 'boolean' then
+            if b == true and a == false then
+                return false
+            else 
+                return true
+            end
+        else
+            return tostring (a) < tostring (b)
+        end
     else 
-        return false
+        return (PRIORITY[atype] or math.huge) < (PRIORITY[btype] or math.huge)
     end
 end
+T.defaultCmpFunc = _comp
 
 ---moretables.getOrderedKeys(t[, comp][, filter])
 -- Get a list of keys in the table in the order specified by the comp function
